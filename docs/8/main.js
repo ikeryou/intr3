@@ -4,7 +4,7 @@
 tgList = [];
 
 // マウス位置
-mouse = {x:0, y:0, isDown:false};
+mouse = {x:window.innerWidth * 0.5, y:window.innerHeight * 0.5, isDown:false};
 
 init();
 
@@ -59,8 +59,11 @@ function init() {
 
   });
 
-  $(window).on('mousemove', _eMouseMove).on('mousedown', _eMouseDown).on('mouseup', _eMouseUp);
-
+  if(isMobile.any) {
+    document.addEventListener('touchmove', _eTouchMove, {passive:false});
+  } else {
+    $(window).on('mousemove', _eMouseMove).on('mousedown', _eMouseDown).on('mouseup', _eMouseUp);
+  }
 }
 
 function _eMouseDown(e) {
@@ -85,6 +88,15 @@ function _eMouseMove(e) {
   mouse.y = e.clientY;
 }
 
+function _eTouchMove(e) {
+  event.preventDefault();
+  touches = event.touches;
+  if(touches != null && touches.length > 0) {
+    mouse.x = touches[0].pageX;
+    mouse.y = touches[0].pageY;
+  }
+}
+
 // 毎フレーム実行
 window.requestAnimationFrame(update);
 function update() {
@@ -98,9 +110,10 @@ function update() {
 
     o = tgList[i];
     if(mouse.isDown) {
-      rotateX(o, radian(2));
+      rotateX(o, radian(3));
       rotateY(o, radian(o.speedY * 0));
       rotateZ(o, radian(o.speedZ * 0));
+      o.x = 0;
     } else {
       rotateX(o, radian(o.speedX));
       rotateY(o, radian(o.speedY));
@@ -122,6 +135,10 @@ function update() {
     color1 = chroma.mix(o.color1, o.color2, map(Math.sin(radian(o.angle1)), 0, 1, -1, 1)).css();
     color2 = chroma.mix(o.color2, o.color3, map(Math.sin(radian(o.angle2)), 0, 1, -1, 1)).css();
     color3 = chroma.mix(o.color3, o.color4, map(Math.sin(radian(o.angle3)), 0, 1, -1, 1)).css();
+
+    if(mouse.isDown) {
+      color1 = '#FF0000';
+    }
 
     o.angle1 += o.speedX * 2;
     o.angle2 += o.speedY * 2.3;
